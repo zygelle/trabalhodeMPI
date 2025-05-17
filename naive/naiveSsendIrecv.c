@@ -5,7 +5,7 @@
 
 int primo (long int n) { /* mpi_primos.c  */
 	int i;
-
+	
 	for (i = 3; i < (int)(sqrt(n) + 1); i+=2) {
 		if(n%i == 0) return 0;
 	}
@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
 	int cont = 0, total = 0;
 	long int i, n;
 	int meu_ranque, num_procs, inicio, salto;
+    MPI_Request request;
 
 	if (argc < 2) {
         printf("Valor inválido! Entre com um valor do maior inteiro\n");
@@ -31,23 +32,24 @@ int main(int argc, char *argv[]) {
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &meu_ranque);
-	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);	
+	MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
     t_inicial = MPI_Wtime();
-    inicio = 3 + meu_ranque*2;
+    inicio = 3 + meu_ranque*2; 
     salto = num_procs*2;
 
 	for (i = inicio; i <= n; i += salto) 
 	{	
 		if(primo(i) == 1) cont++;
 	}
-		
+
 	if(num_procs > 1) {
 		if(meu_ranque != 0) {
-			MPI_Send(&cont, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+			MPI_Ssend(&cont, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
 		} else {
 			total = cont;
-			for(int origem = 1; origem < num_procs; origem++) {
-				MPI_Recv(&cont, 1, MPI_INT, origem, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			for (int origem = 1; origem < num_procs; origem++) {
+                MPI_Irecv(&cont, 1, MPI_INT, origem, 0, MPI_COMM_WORLD, &request);
+                MPI_Wait(&request, MPI_STATUS_IGNORE);
 				total += cont;
 			}
 		}
@@ -65,5 +67,3 @@ int main(int argc, char *argv[]) {
 	MPI_Finalize();
 	return(0);
 }
-// Compile: mpicc -o naiveSendRecv naiveSendRecv.c -lm
-// Execute: mpirun -np 4 ./naiveSendRecv 1000000

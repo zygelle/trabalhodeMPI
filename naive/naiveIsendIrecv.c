@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
         n = strtol(argv[1], (char **) NULL, 10);
 		if (n < 2) {
 			printf("Valor inválido! Entre com um valor maior que 1\n");
+			return 0;
 		}
 	}
 
@@ -42,8 +43,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	if(num_procs > 1) {
-		if (meu_ranque != 0) {
-			MPI_Send(&cont, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+		if(meu_ranque != 0) {
+			MPI_Isend(&cont, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &request);
 		} else {
 			total = cont;
 			for (int origem = 1; origem < num_procs; origem++) {
@@ -66,3 +67,4 @@ int main(int argc, char *argv[]) {
 	MPI_Finalize();
 	return(0);
 }
+
