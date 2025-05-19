@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) { /* mpi_primosbag.c  */
                 tag = 99;
                 stop++;
             }
-            MPI_Isend(&tag, 1, MPI_INT, dest, tag, MPI_COMM_WORLD, &pedido_envia);
+            MPI_Isend(&inicio, 1, MPI_INT, dest, tag, MPI_COMM_WORLD, &pedido_envia);
             MPI_Wait(&pedido_envia, &estado);
             inicio += TAMANHO;
         }
